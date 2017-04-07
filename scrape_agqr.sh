@@ -4,7 +4,7 @@ NAME="scrape_agqr"
 AGQR_URL="http://www.agqr.jp/timetable/streaming.html"
 CURL="/usr/bin/curl"
 XMLLINT="/usr/bin/xmllint"
-XMLLINT_OPT="--html --htmlout"
+XMLLINT_OPT="--html"
 RAW_HTML="./tmp/streaming.html"
 MOD_HTML="./tmp/streaming_mod.html"
 RESULT_JSON="schedule.json"
@@ -24,7 +24,7 @@ $CURL -L $AGQR_URL > $RAW_HTML 2> /dev/null
 echo "<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"></head>" > $MOD_HTML
 $XMLLINT $XMLLINT_OPT --xpath "/html/body/div[2]/div/table" $RAW_HTML >> $MOD_HTML 2> /dev/null
 echo "</html>" >> $MOD_HTML
-echo "[\n" > $RESULT_JSON
+echo "[" > $RESULT_JSON
 cnt=0
 for i in {1..1500}; do
     for j in {1..7}; do
