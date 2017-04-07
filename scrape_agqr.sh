@@ -64,7 +64,8 @@ for i in {1..1500}; do
         fi
     done
 done
-sed -i -e '$s/,$//' $RESULT_JSON
+sed -i '' '$s/,$//' $RESULT_JSON
 echo "]" >> $RESULT_JSON
+rm -rf ./tmp
 
 exit 0
