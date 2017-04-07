@@ -25,6 +25,7 @@ echo "<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"></head>" > $MOD
 $XMLLINT $XMLLINT_OPT --xpath "/html/body/div[2]/div/table" $RAW_HTML >> $MOD_HTML 2> /dev/null
 echo "</html>" >> $MOD_HTML
 echo "[\n" > $RESULT_JSON
+cnt=0
 for i in {1..1500}; do
     for j in {1..7}; do
         elem=$($XMLLINT $XMLLINT_OPT --xpath "/html/body/table/tbody/tr[$i]/td[$j]" $MOD_HTML 2> /dev/null)
@@ -42,7 +43,11 @@ for i in {1..1500}; do
             # TITLE
             json+="\t\"title\": "
             json+="\""
-            json+=$(echo $elem | grep -o "<a[^>]*>[^<]*</a>\|<div class=\"title-p[^>]*>[^<]*</div>" | sed -e 's/<[^>]*>//g' | sed -e 's/\&amp;/\&/g')
+            title=$(echo $elem | grep -o "<a[^>]*>[^<]*</a>\|<div class=\"title-p[^>]*>[^<]*</div>" | sed -e 's/<[^>]*>//g' | sed -e 's/\&amp;/\&/g')
+            if [ "$title" = " 放送休止 " ]; then
+                let ++cnt
+            fi
+            json+=$title
             json+="\",\n"
             # PERSONALITY
             json+="\t\"personality\": "
@@ -51,8 +56,15 @@ for i in {1..1500}; do
             json+="\"\n"
             json+="},"
             echo $json >> $RESULT_JSON
+            if [ $cnt = 7 ]; then
+                break 2
+            fi
+        else
+            break 1
         fi
     done
 done
-sed '$s/.$//'
-echo "]\n" >> $RESULT_JSON
+sed -i -e '$s/,$//' $RESULT_JSON
+echo "]" >> $RESULT_JSON
+
+exit 0
