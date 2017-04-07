@@ -42,7 +42,7 @@ for i in {1..1500}; do
             # TITLE
             json+="\t\"title\": "
             json+="\""
-            json+=$(echo $elem | grep -o "<a[^>]*>[^<]*</a>\|<div class=\"title-p[^>]*>[^<]*</div>" | sed -e 's/<[^>]*>//g')
+            json+=$(echo $elem | grep -o "<a[^>]*>[^<]*</a>\|<div class=\"title-p[^>]*>[^<]*</div>" | sed -e 's/<[^>]*>//g' | sed -e 's/\&amp;/\&/g')
             json+="\",\n"
             # PERSONALITY
             json+="\t\"personality\": "
