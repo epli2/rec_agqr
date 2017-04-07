@@ -30,7 +30,22 @@ for i in {1..1500}; do
     for j in {1..7}; do
         elem=$($XMLLINT $XMLLINT_OPT --xpath "/html/body/table/tbody/tr[$i]/td[$j]" $MOD_HTML 2> /dev/null)
         if [ ! -z "$elem" ]; then
-            json="{\n\t\"day\": $j,\n"
+            json="{\n"
+            # TYPE
+            json+="\t\"type\": "
+            json+="\""
+            if [ ! -z $(echo $elem | grep -o "bg-repeat") ]; then
+                json+="r"
+            elif [ ! -z $(echo $elem | grep -o "bg-f") ]; then
+                json+="f"
+            elif [ ! -z $(echo $elem | grep -o "bg-l") ]; then
+                json+="l"
+            else
+                json+="o"
+            fi
+            json+="\",\n"
+            # WDAY
+            json+="\t\"wday\": $j,\n"
             # TIME
             json+="\t\"time\": "
             json+="\""
