@@ -29,33 +29,28 @@ for i in {1..1500}; do
     for j in {1..7}; do
         elem=$($XMLLINT $XMLLINT_OPT --xpath "/html/body/table/tbody/tr[$i]/td[$j]" $MOD_HTML 2> /dev/null)
         if [ ! -z "$elem" ]; then
-            filename_html="./tmp/$i-$j.html"
-            filename_json="./tmp/$i-$j.json"
-            echo $elem > $filename_html
-            echo "{\n    \"day\": $j," >> $filename_json
+            json="{\n\t\"day\": $j,\n"
             # TIME
-            echo "    \"time\": \c" >> $filename_json
-            echo "\"\c" >> $filename_json
-            cat $filename_html | grep -o "[0-9][0-9]:[0-9][0-9]" | tr -d '\n' >> $filename_json
-            echo "\"," >> $filename_json
+            json+="\t\"time\": "
+            json+="\""
+            json+=$(echo $elem | grep -o "[0-9][0-9]:[0-9][0-9]")
+            json+="\",\n"
             # DURATION
-            echo "    \"duration\": \c" >> $filename_json
-            cat $filename_html | grep -o "rowspan=\"[0-9][0-9][0-9]*\"" | tr -d "rowspan=" | tr -d "\"" | tr -d '\n' >> $filename_json
-            echo "," >> $filename_json
+            json+="\t\"duration\": "
+            json+=$(echo $elem | grep -o "rowspan=\"[0-9][0-9][0-9]*\"" | tr -d "rowspan=" | tr -d "\"")
+            json+=",\n"
             # TITLE
-            echo "    \"title\": \c" >> $filename_json
-            echo "\"\c" >> $filename_json
-            cat $filename_html | grep -o "<a[^>]*>[^<]*</a>\|<div class=\"title-p[^>]*>[^<]*</div>" | sed -e 's/<[^>]*>//g' | tr -d '\n' >> $filename_json
-            echo "\"," >> $filename_json
+            json+="\t\"title\": "
+            json+="\""
+            json+=$(echo $elem | grep -o "<a[^>]*>[^<]*</a>\|<div class=\"title-p[^>]*>[^<]*</div>" | sed -e 's/<[^>]*>//g')
+            json+="\",\n"
             # PERSONALITY
-            echo "    \"personality\": \c" >> $filename_json
-            echo "\"\c" >> $filename_json
-            cat $filename_html | grep -o "<div class=\"rp\">.*</div>" | sed -e 's/<[^>]*>//g' | tr -d "[ ->\n]" >> $filename_json
-            echo "\"" >> $filename_json
-            echo "}" | tr -d "\n" >> $filename_json
-
-            cat $filename_json >> $RESULT_JSON
-            echo "," >> $RESULT_JSON
+            json+="\t\"personality\": "
+            json+="\""
+            json+=$(echo $elem | grep -o "<div class=\"rp\">.*</div>" | sed -e 's/<[^>]*>//g' | tr -d "[ ->]")
+            json+="\"\n"
+            json+="},"
+            echo $json >> $RESULT_JSON
         fi
     done
 done
