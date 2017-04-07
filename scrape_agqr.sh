@@ -29,7 +29,6 @@ for i in {1..1500}; do
     for j in {1..7}; do
         elem=$($XMLLINT $XMLLINT_OPT --xpath "/html/body/table/tbody/tr[$i]/td[$j]" $MOD_HTML 2> /dev/null)
         if [ ! -z "$elem" ]; then
-            echo $elem
             filename_html="./tmp/$i-$j.html"
             filename_json="./tmp/$i-$j.json"
             echo $elem > $filename_html
