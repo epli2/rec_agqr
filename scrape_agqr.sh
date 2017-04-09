@@ -30,6 +30,11 @@ for i in {1..1500}; do
     for j in {1..7}; do
         elem=$($XMLLINT $XMLLINT_OPT --xpath "/html/body/table/tbody/tr[$i]/td[$j]" $MOD_HTML 2> /dev/null)
         if [ ! -z "$elem" ]; then
+            p_time=$(echo $elem | grep -o "[0-9][0-9]:[0-9][0-9]")
+            wday=$j
+            duration=$(echo $elem | grep -o "rowspan=\"[0-9][0-9][0-9]*\"" | tr -d "rowspan=" | tr -d "\"")
+            title=$(echo $elem | grep -o "<a[^>]*>[^<]*</a>\|<div class=\"title-p[^>]*>[^<]*</div>" | sed -e 's/<[^>]*>//g' | sed -e 's/\&amp;/\&/g')
+            personality=$(echo $elem | grep -o "<div class=\"rp\">.*</div>" | sed -e 's/<[^>]*>//g' | tr -d "[ ->]")
             json="{\n"
             # TYPE
             json+="\t\"type\": "
@@ -45,20 +50,19 @@ for i in {1..1500}; do
             fi
             json+="\",\n"
             # WDAY
-            json+="\t\"wday\": $j,\n"
+            json+="\t\"wday\": $wday,\n"
             # TIME
             json+="\t\"time\": "
             json+="\""
-            json+=$(echo $elem | grep -o "[0-9][0-9]:[0-9][0-9]")
+            json+=$p_time
             json+="\",\n"
             # DURATION
             json+="\t\"duration\": "
-            json+=$(echo $elem | grep -o "rowspan=\"[0-9][0-9][0-9]*\"" | tr -d "rowspan=" | tr -d "\"")
+            json+=$duration
             json+=",\n"
             # TITLE
             json+="\t\"title\": "
             json+="\""
-            title=$(echo $elem | grep -o "<a[^>]*>[^<]*</a>\|<div class=\"title-p[^>]*>[^<]*</div>" | sed -e 's/<[^>]*>//g' | sed -e 's/\&amp;/\&/g')
             if [ "$title" = " 放送休止 " ]; then
                 let ++cnt
             fi
@@ -67,7 +71,7 @@ for i in {1..1500}; do
             # PERSONALITY
             json+="\t\"personality\": "
             json+="\""
-            json+=$(echo $elem | grep -o "<div class=\"rp\">.*</div>" | sed -e 's/<[^>]*>//g' | tr -d "[ ->]")
+            json+=$personality
             json+="\"\n"
             json+="},"
             echo $json >> $RESULT_JSON
